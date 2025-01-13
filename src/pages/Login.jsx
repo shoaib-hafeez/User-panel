@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Container } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate , Link} from 'react-router-dom';
 import { loginUser } from '../services/Auth-service';
 import useUserStore from '../store/User-store'; // Import the store
 
@@ -17,21 +17,19 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     try {
       const response = await loginUser({ email, password });
-
+  
       if (response.status === 200 || response.status === 201) {
-        const token = response.data.data.accessToken; // Assuming the token is in the response
-        const user = response.data.data.user; // Assuming user data is in the response
-
-        // Save token to localStorage
-        localStorage.setItem('authToken', token);
-        // Save user using Zustand store
-        setUser(user);
-
+        const token = response.data.data.accessToken; 
+        const user = response.data.data.user;
+  
+        localStorage.setItem('authToken', token);  // 🔑 Token save
+        setUser(user);  // 🏷 Zustand + localStorage mein user save
+  
         alert('Login successful!');
-        navigate('/dashboard'); // Redirect to the dashboard
+        navigate('/');  // 🚀 Redirect
       }
     } catch (err) {
       console.error(err);
@@ -40,6 +38,7 @@ const Login = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <Container className="my-5">
@@ -63,10 +62,14 @@ const Login = () => {
             required
           />
         </Form.Group>
-        {error && <p className="text-danger mt-3">{error}</p>}
+        {error && <p className="text-danger mt-3 me-3">{error}</p>}
         <Button type="submit" className="mt-3" disabled={loading}>
           {loading ? 'Logging in...' : 'Login'}
         </Button>
+        <br />
+        <p className="mt-3">dont have account please <Link to={'/signup'}>signup </Link>  </p>
+        
+       
       </Form>
     </Container>
   );

@@ -31,3 +31,28 @@
     /* border: 1px solid black; */
     box-shadow: 2px 5px 10px rgb(68, 65, 65);
 }
+.logoutBtn{
+    all: unset;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 0 10px;
+    font-weight: 800;
+    font-size: 16px;
+    /* margin: 0; */
+}
+.logoutBtn:hover{
+    background-color: red;
+    /* box-shadow: 2px 5px 5px rgb(181, 157, 157); */
+}
+.card_button{
+    display: flex;
+    justify-content: space-around;
+
+}
+.card_button span{
+    font-size: 24px;
+}
+.likes_Qty{
+    font-size: 16px !important;
+    color: red;
+}

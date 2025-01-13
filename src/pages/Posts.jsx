@@ -2,13 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axiosClient from '../lib/axios';
+import { FaRegHeart } from "react-icons/fa";
+import { FaRegComment } from "react-icons/fa";
+import { MdReadMore } from "react-icons/md";
+import useUserStore from '../store/User-store'; // Zustand store for user
+import usePostStore from '../store/Post-store';
 
 const Posts = () => {
-  const [posts, setPosts] = useState([]);
+
+  const { user } = useUserStore();
+  const { comment, setComment } = usePostStore()
+  const [posts, setPosts,] = useState([]);
+  console.log('posts ', posts)
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-    const id = posts.id;
-    console.log('id is ', id)
+  const [editingPostId, setEditingPostId] = useState({});
+
   // Fetch posts from the API
   useEffect(() => {
     const fetchPosts = async () => {
@@ -25,8 +34,42 @@ const Posts = () => {
     fetchPosts();
   }, []);
 
-  // Handle like functionality
+  const handleCommentSubmit = async (postId) => {
+    if (!comment.trim()) {
+      alert("Comment content is required.");
+      return;
+    }
+
+    if (!user) { // Check if user is logged in
+      alert("Please login or sign up first to comment.");
+      return;
+    }
+
+    try {
+      const response = await axiosClient.post(`/social-media/comments/post/${postId}`,
+        { content: comment }
+      );
+      if (response.data.success) {
+        // Update posts with the new comments
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId ? { ...post, comments: response.data.data.comments } : post
+          )
+        );
+        setComment(''); // Clear comment field after successful submission
+        setEditingPostId(null); // Hide input field after submission
+      }
+    } catch (err) {
+      console.error("Error posting comment:", err);
+    }
+  };
+
   const handleLike = async (postId) => {
+    if (!user) { // Check if user is logged in
+      alert("Please login or sign up first to like.");
+      return;
+    }
+
     try {
       const response = await axiosClient.post(`/social-media/like/post/${postId}`);
       if (response.data.success) {
@@ -50,35 +93,53 @@ const Posts = () => {
       <div className="post_container">
         {posts.length > 0 ? (
           posts.map((post) => (
-            <Card key={post.id} className="mb-3 post_card">
+            <Card key={post.id} className="mb-3 post_card borderd">
               {post.images.length > 0 ? (
                 <img
                   src={post.images[0]?.url || 'placeholder-image-url.jpg'}
                   alt="Post"
                   className="card_image"
-               
                 />
               ) : (
                 'No Image'
               )}
               <Card.Body>
-                {/* <Card.Title>{post.title}</Card.Title> */}
                 <Card.Text>{post.content}</Card.Text>
+                <hr />
+                <div className="card_button">
 
-                {/* Like Button */}
-                <Button variant="primary" onClick={() => handleLike(post.id)} className="me-2">
-                  Like ({post.likes})
-                </Button>
+                  {/* Like Button */}
+                  {/* <Button variant="primary"  className="me-2"> */}
+                 <span> <FaRegHeart onClick={() => handleLike(post._id)} /><span className='likes_Qty'>{post.likes}</span></span>
+                  {/* </Button> */}
 
-                {/* Read More Link */}
-                <Link to={`/posts/${post.id}`} className="btn btn-secondary me-2">
-                  Read More
-                </Link>
 
-               
-                  
-               
-                
+                  {/* <Button variant="primary" onClick={() => setEditingPostId(post.id)} className="me-2"> */}
+                  <span><FaRegComment onClick={() => setEditingPostId(post.id)} /> <span className='likes_Qty'>{post.comments}</span></span>
+                  {/* </Button> */}
+                  <span><Link to={`/posts/${post._id}`} >
+                    <MdReadMore />
+                  </Link></span> 
+
+                  {/* Render Input Field if Editing this Post */}
+                  {editingPostId === post.id && (
+                    <Form onSubmit={(e) => { e.preventDefault(); handleCommentSubmit(post._id); }}>
+                      <Form.Group controlId="comment">
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          placeholder="Write your comment here"
+                        />
+                      </Form.Group>
+                      <Button variant="success" type="submit" className="mt-2">
+                        Submit Comment
+                      </Button>
+                    </Form>
+                  )}
+                </div>
+
               </Card.Body>
             </Card>
           ))
@@ -86,7 +147,7 @@ const Posts = () => {
           <p>No posts available.</p>
         )}
       </div>
-    </Container>
+    </Container >
   );
 };
 

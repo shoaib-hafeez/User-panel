@@ -1,29 +1,37 @@
 // src/App.js
-import React from 'react';
+import React from "react";
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AppNavbar from './components/Navbar';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-import Posts from './pages/Posts';
-import PostDetails from './pages/Post-detalis';
-import Profile from './pages/Profile';
-   
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Posts from "./pages/Posts";
+import PostDetails from "./pages/Post-detalis";
+import Profile from "./pages/Profile";
+import Dashboard from "./dashboard/Dashboard";
+
 const App = () => {
+
+  const router = createBrowserRouter([
+    { path: "/signup", element: <Signup/> },
+    { path: "/login", element: <Login /> },
+
+    {
+      path: "/",
+      element: <Dashboard />,
+      children: [
+        { path: "/Posts", element: <Posts /> },
+        { path: "/posts/:id", element: <PostDetails /> },
+        { path: "/profile", element: <Profile /> },
+      ],
+    },
+
+  ]);
   return (
-    <Router>
-     <AppNavbar />
-     
-    
-      <Routes>
-        {/* <Route path="/dashboard" element={<AppNavbar />} /> */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/posts" element={<Posts />} />
-        <Route path="/posts/:id" element={<PostDetails />} />
-        <Route path="/profile" element={<Profile />} />
-      </Routes>
-    </Router>
+
+    <div className="App">
+      <RouterProvider router={router} />
+    </div>
+
   );
 };
 

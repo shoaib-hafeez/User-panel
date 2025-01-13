@@ -1,15 +1,23 @@
-import React from 'react'
-import AppNavbar from '../components/Navbar'
+// src/layouts/DashboardLayout.js
+import React from "react";
+import { Outlet } from "react-router-dom";
+import AppNavbar from "../components/Navbar";
+import { Container } from "react-bootstrap";
 
 const Dashboard = () => {
   return (
-    <div>
+    <>
+      <Container>
 
-        <AppNavbar />
-        
+      <AppNavbar />
 
-    </div>
-  )
-}
+      <div className="dashboard-content">
+        <Outlet /> {/* Render child routes here */}
+      </div>
+      
+      </Container>
+    </>
+  );
+};
 
-export default Dashboard
+export default Dashboard;

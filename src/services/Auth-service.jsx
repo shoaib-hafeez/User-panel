@@ -9,7 +9,7 @@ export const loginUser = (credentials) => {
 export const signupUser = (data) => {
   return axiosClient.post('/users/register', data);
 };
-
+// logout API
 export const logoutUser = ( ) => {
   return axiosClient.post ('/users/logout')
 }
