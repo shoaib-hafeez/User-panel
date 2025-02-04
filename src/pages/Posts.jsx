@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import axiosClient from '../lib/axios';
-import { FaRegHeart } from "react-icons/fa";
+import { FaRegHeart, FaHeart } from "react-icons/fa"; // Added filled heart icon
 import { FaRegComment } from "react-icons/fa";
 import { MdReadMore } from "react-icons/md";
 import useUserStore from '../store/User-store'; // Zustand store for user
 import usePostStore from '../store/Post-store';
+import { useTranslation } from 'react-i18next';
 
 const Posts = () => {
-
   const { user } = useUserStore();
-  const { comment, setComment } = usePostStore()
-  const [posts, setPosts,] = useState([]);
-  console.log('posts ', posts)
+  const { comment, setComment } = usePostStore();
+  const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingPostId, setEditingPostId] = useState({});
+  const [editingPostId, setEditingPostId] = useState(null);
+  const { t, i18n } = useTranslation(); // Initialize translation hook
 
   // Fetch posts from the API
   useEffect(() => {
@@ -26,22 +26,22 @@ const Posts = () => {
         setPosts(response.data.data.posts);
       } catch (err) {
         console.error('Error fetching posts:', err);
-        setError('Failed to load posts. Please try again later.');
+        setError(t('errorFetchingPosts')); // Localized error message
       } finally {
         setLoading(false);
       }
     };
     fetchPosts();
-  }, []);
+  }, [t]);
 
   const handleCommentSubmit = async (postId) => {
     if (!comment.trim()) {
-      alert("Comment content is required.");
+      alert(t('commentRequired')); // Localized alert message
       return;
     }
 
     if (!user) { // Check if user is logged in
-      alert("Please login or sign up first to comment.");
+      alert(t('loginToComment')); // Localized alert message
       return;
     }
 
@@ -50,7 +50,6 @@ const Posts = () => {
         { content: comment }
       );
       if (response.data.success) {
-        // Update posts with the new comments
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
             post.id === postId ? { ...post, comments: response.data.data.comments } : post
@@ -66,7 +65,7 @@ const Posts = () => {
 
   const handleLike = async (postId) => {
     if (!user) { // Check if user is logged in
-      alert("Please login or sign up first to like.");
+      alert(t('loginToLike')); // Localized alert message
       return;
     }
 
@@ -75,7 +74,9 @@ const Posts = () => {
       if (response.data.success) {
         setPosts((prevPosts) =>
           prevPosts.map((post) =>
-            post.id === postId ? { ...post, likes: response.data.data.likes } : post
+            post.id === postId
+              ? { ...post, likes: response.data.data.likes, liked: !post.liked } // Toggle 'liked' status
+              : post
           )
         );
       }
@@ -84,12 +85,15 @@ const Posts = () => {
     }
   };
 
-  if (loading) return <p>Loading posts...</p>;
-  if (error) return <p className="text-danger">{error}</p>;
+  if (loading) return <p className="loading">{t('loadingPosts')}</p>; // Localized loading message
+  if (error) return <p className="text-danger">{error}</p>; // Localized error message
+
+  // Determine if the current language is Urdu
+  const isUrdu = i18n.language === 'ur';
 
   return (
-    <Container>
-      <h2>Posts</h2>
+    <Container className={isUrdu ? 'rtl' : ''}>
+      <h2>{t("posts")}</h2>
       <div className="post_container">
         {posts.length > 0 ? (
           posts.map((post) => (
@@ -97,29 +101,31 @@ const Posts = () => {
               {post.images.length > 0 ? (
                 <img
                   src={post.images[0]?.url || 'placeholder-image-url.jpg'}
-                  alt="Post"
+                  alt={t('postImage')} // Localized alt text for image
                   className="card_image"
                 />
               ) : (
-                'No Image'
+                t('noImage') // Localized message for no image
               )}
               <Card.Body>
                 <Card.Text>{post.content}</Card.Text>
+                <Card.Text>{post.tags}</Card.Text>
                 <hr />
                 <div className="card_button">
-
                   {/* Like Button */}
-                  {/* <Button variant="primary"  className="me-2"> */}
-                 <span> <FaRegHeart onClick={() => handleLike(post._id)} /><span className='likes_Qty'>{post.likes}</span></span>
-                  {/* </Button> */}
+                  <span onClick={() => handleLike(post._id)}>
+                    {post.isLiked ? (
+                      <FaHeart color="red" /> // Filled heart icon for liked posts
+                    ) : (
+                      <FaRegHeart /> // Regular heart icon for unliked posts
+                    )}
+                    <span className='likes_Qty'>{post.likes}</span>
+                  </span>
 
-
-                  {/* <Button variant="primary" onClick={() => setEditingPostId(post.id)} className="me-2"> */}
                   <span><FaRegComment onClick={() => setEditingPostId(post.id)} /> <span className='likes_Qty'>{post.comments}</span></span>
-                  {/* </Button> */}
                   <span><Link to={`/posts/${post._id}`} >
                     <MdReadMore />
-                  </Link></span> 
+                  </Link></span>
 
                   {/* Render Input Field if Editing this Post */}
                   {editingPostId === post.id && (
@@ -130,11 +136,12 @@ const Posts = () => {
                           rows={3}
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
-                          placeholder="Write your comment here"
+                          placeholder='writeComment'
+
                         />
                       </Form.Group>
                       <Button variant="success" type="submit" className="mt-2">
-                        Submit Comment
+                       submitComment
                       </Button>
                     </Form>
                   )}
@@ -144,10 +151,10 @@ const Posts = () => {
             </Card>
           ))
         ) : (
-          <p>No posts available.</p>
+          <p>{t('noPosts')}</p> // Localized message for no posts
         )}
       </div>
-    </Container >
+    </Container>
   );
 };
 

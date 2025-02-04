@@ -56,3 +56,11 @@
     font-size: 16px !important;
     color: red;
 }
+.rtl {
+    direction: rtl;
+    text-align: right;
+  }
+  .loading{
+    text-align: center;
+    font-size: 24px;
+  }

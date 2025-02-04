@@ -5,6 +5,7 @@ import useUserStore from '../store/User-store';
 
 const Profile = () => {
   const { user } = useUserStore();
+  
   return (
     <Container>
       <h2>Profile</h2>

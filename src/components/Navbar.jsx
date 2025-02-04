@@ -1,21 +1,27 @@
 import React, { useState } from 'react';
-import { Container, Nav, Navbar, Button, Modal } from 'react-bootstrap';
+import { Container, Nav, Navbar, Button, Modal, Dropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import useUserStore from '../store/User-store';
 import { logoutUser } from '../services/Auth-service';
+import '../i18n'; // Import i18n configuration
 
 const AppNavbar = () => {
+  const { t, i18n } = useTranslation();
   const { user, logout } = useUserStore();
   const navigate = useNavigate();
 
-  //  Modal state
   const [showModal, setShowModal] = useState(false);
 
-  //  Modal show/hide handlers
+  // 🔹 Language Change Function
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    localStorage.setItem("language", lng); // Save user preference
+  };
+
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => setShowModal(false);
 
-  //  Logout confirmation
   const handleConfirmLogout = async () => {
     try {
       await logoutUser();
@@ -25,40 +31,51 @@ const AppNavbar = () => {
       console.error('Error during logout:', error.response?.data?.message || error.message);
       alert('Failed to logout. Please try again.');
     } finally {
-      handleCloseModal(); // Modal ko close karo
+      handleCloseModal();
     }
   };
 
   return (
     <>
-      <Navbar expand="lg" className="bg-body-tertiary" sticky="top">
+      <Navbar expand="lg" className="bg-body-tertiary"  sticky="top">
         <Container>
           <Navbar.Brand>
-            <Nav.Link as={Link} to="/">My-App</Nav.Link>
+            <Nav.Link as={Link} to="/">My-App</Nav.Link> 
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link as={Link} to="/posts">Posts</Nav.Link>
-              {user && <Nav.Link as={Link} to="/profile">Profile</Nav.Link>}
+              <Nav.Link as={Link} to="/posts">{t("posts")}</Nav.Link>
+              {user && <Nav.Link as={Link} to="/profile">{t("profile")}</Nav.Link>}
             </Nav>
             <Nav>
+              {/* 🔹 Language Selector */}
+              <Dropdown>
+                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  {t("selectLanguage")}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => changeLanguage("en")}>English</Dropdown.Item>
+                  <Dropdown.Item onClick={() => changeLanguage("ur")}>اردو</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+
               {user ? (
                 <>
                   <span className="navbar-text me-3">
-                    Welcome <b>{user.username}!</b>
+                    {t("welcome", { name: user.username })}
                   </span>
                   <button className='logoutBtn'>
-                    <Nav.Link onClick={handleShowModal}>Logout</Nav.Link>
+                    <Nav.Link onClick={handleShowModal}>{t("logout")}</Nav.Link>
                   </button>
                 </>
               ) : (
                 <>
                   <Nav.Link as={Link} to="/login">
-                    <button className="btn btn-primary">Login</button>
+                    <button className="btn btn-primary">{t("login")}</button>
                   </Nav.Link>
                   <Nav.Link as={Link} to="/signup">
-                    <button className="btn btn-secondary">Signup</button>
+                    <button className="btn btn-secondary">{t("signup")}</button>
                   </Nav.Link>
                 </>
               )}
@@ -70,17 +87,17 @@ const AppNavbar = () => {
       {/* 🔴 Logout Confirmation Modal */}
       <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false}>
         <Modal.Header closeButton>
-          <Modal.Title>Confirm Logout</Modal.Title>
+          <Modal.Title>{t("confirmLogout")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          Are you sure you want to logout?
+          {t("sureLogout")}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModal}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button variant="danger" onClick={handleConfirmLogout}>
-            Logout
+            {t("logout")}
           </Button>
         </Modal.Footer>
       </Modal>

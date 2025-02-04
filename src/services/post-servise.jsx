@@ -1,15 +1,22 @@
+// src/services/post-service.js
 import axiosClient from '../lib/axios';
 
-// export const fetchPosts = () =>
+// Fetch comments for a specific post
+export const getPostComments = (postId) => {
+  return axiosClient.get(`/social-media/comments/post/${postId}`);
+};
 
-//     axiosClient.get('/social-media/posts');
+// Add a new comment to a specific post
+export const addCommentToPost = (postId, commentData) => {
+  return axiosClient.post(`/social-media/comments/post/${postId}`, commentData);
+};
 
-export const fetchPostById = (id) =>
+// Fetch a specific post (if needed)
+export const getPostById = (postId) => {
+  return axiosClient.get(`/social-media/posts/${postId}`);
+};
 
-    axiosClient.get(`/social-media/posts/${id}`);
-
-    // export const likePostAPI = (postId) =>{
-    
-    //     axiosClient.post(`/social-media/like/post/${postId}`)
-
-    // }
+// Like a specific post
+export const likePost = (postId) => {
+  return axiosClient.post(`/social-media/like/post/${postId}`);
+};

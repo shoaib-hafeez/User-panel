@@ -8,6 +8,7 @@ import Posts from "./pages/Posts";
 import PostDetails from "./pages/Post-detalis";
 import Profile from "./pages/Profile";
 import Dashboard from "./dashboard/Dashboard";
+import "./i18n";
 
 const App = () => {
 
